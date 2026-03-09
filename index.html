@@ -1,385 +1,412 @@
-import React, { useState } from 'react';
-import { 
-  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area, ComposedChart, LabelList
-} from 'recharts';
-import { TrendingUp, Droplet, DollarSign, Activity, FlaskConical, AlertCircle, CheckCircle2 } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Analítico & Inteligência de Dados</title>
+    
+    <!-- Importando Tailwind CSS para o Design e Layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Importando React e ReactDOM via CDN (Versões Fixas para garantir estabilidade no UMD) -->
+    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    
+    <!-- Dependência obrigatória para as versões em navegador do Recharts -->
+    <script crossorigin src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    
+    <!-- Importando Recharts (Biblioteca de Gráficos) via CDN (Versão Fixada na 2.1.9 para evitar o erro de 'ForwardRef') -->
+    <script crossorigin src="https://unpkg.com/recharts@2.1.9/umd/Recharts.js"></script>
+    
+    <!-- Importando Babel para compilar o JSX direto no navegador -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-// --- DADOS EXTRAÍDOS DAS PLANILHAS ---
+    <style>
+        /* Ajuste fino para animações de fade-in contidas no Tailwind original */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 font-sans">
+    
+    <!-- Onde o React vai injetar o Dashboard -->
+    <div id="root"></div>
 
-const dataEvolucao = [
-  { ano: '2018', amostras: 1562, ensaios: 7835 },
-  { ano: '2019', amostras: 2441, ensaios: 17170 },
-  { ano: '2020', amostras: 3147, ensaios: 12520 },
-  { ano: '2021', amostras: 9417, ensaios: 26019 },
-  { ano: '2022', amostras: 13165, ensaios: 29588 },
-  { ano: '2023', amostras: 12398, ensaios: 37222 },
-  { ano: '2024', amostras: 18767, ensaios: 51399 },
-  { ano: '2025', amostras: 31626, ensaios: 71454 },
-];
+    <!-- Script do Aplicativo -->
+    <script type="text/babel">
+        // Extraindo ferramentas do React e Recharts
+        const { useState } = React;
+        const { 
+          BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
+          ResponsiveContainer, AreaChart, Area, ComposedChart, LabelList 
+        } = window.Recharts;
 
-const dataAgua = [
-  { mes: 'Jan', agua: 685, totalFq: 2042, perc: 33.5 },
-  { mes: 'Fev', agua: 831, totalFq: 2415, perc: 34.4 },
-  { mes: 'Mar', agua: 784, totalFq: 2158, perc: 36.3 },
-  { mes: 'Abr', agua: 812, totalFq: 2205, perc: 36.8 },
-  { mes: 'Mai', agua: 868, totalFq: 2302, perc: 37.7 },
-  { mes: 'Jun', agua: 1053, totalFq: 2350, perc: 44.8 },
-  { mes: 'Jul', agua: 1527, totalFq: 2903, perc: 52.6 },
-  { mes: 'Ago', agua: 764, totalFq: 1764, perc: 43.3 },
-  // Dados simulados para fechar o ano mantendo a tendência da planilha original
-  { mes: 'Set', agua: 800, totalFq: 2000, perc: 40.0 },
-  { mes: 'Out', agua: 850, totalFq: 2073, perc: 41.0 },
-  { mes: 'Nov', agua: 900, totalFq: 2142, perc: 42.0 },
-  { mes: 'Dez', agua: 950, totalFq: 2209, perc: 43.0 },
-];
+        // --- ÍCONES (Convertidos de lucide-react para SVG inline nativo para funcionar sem Node.js) ---
+        const IconTrendingUp = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        );
+        const IconDroplet = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+        );
+        const IconDollarSign = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        );
+        const IconActivity = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        );
+        const IconFlaskConical = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
+        );
+        const IconAlertCircle = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        );
+        const IconCheckCircle2 = ({ size = 24, className = "" }) => (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        );
 
-const dataSubcontratacao = [
-  { mes: 'Jan', metais: 66, analisadasIts: 66, subcontratado: 0, custo: 0 },
-  { mes: 'Fev', metais: 124, analisadasIts: 100, subcontratado: 24, custo: 4800 },
-  { mes: 'Mar', metais: 73, analisadasIts: 70, subcontratado: 3, custo: 600 },
-  { mes: 'Abr', metais: 112, analisadasIts: 100, subcontratado: 12, custo: 2400 },
-  { mes: 'Mai', metais: 80, analisadasIts: 70, subcontratado: 10, custo: 2000 },
-  { mes: 'Jun', metais: 136, analisadasIts: 94, subcontratado: 42, custo: 8400 },
-  { mes: 'Jul', metais: 184, analisadasIts: 132, subcontratado: 52, custo: 10400 },
-  { mes: 'Ago', metais: 156, analisadasIts: 109, subcontratado: 47, custo: 9400 },
-  { mes: 'Set', metais: 144, analisadasIts: 122, subcontratado: 20, custo: 4000 },
-  { mes: 'Out', metais: 234, analisadasIts: 127, subcontratado: 107, custo: 21400 },
-  { mes: 'Nov', metais: 134, analisadasIts: 125, subcontratado: 9, custo: 1800 },
-  { mes: 'Dez', metais: 121, analisadasIts: 100, subcontratado: 21, custo: 4200 },
-];
+        // --- DADOS EXTRAÍDOS DAS PLANILHAS ---
+        const dataEvolucao = [
+          { ano: '2018', amostras: 1562, ensaios: 7835 },
+          { ano: '2019', amostras: 2441, ensaios: 17170 },
+          { ano: '2020', amostras: 3147, ensaios: 12520 },
+          { ano: '2021', amostras: 9417, ensaios: 26019 },
+          { ano: '2022', amostras: 13165, ensaios: 29588 },
+          { ano: '2023', amostras: 12398, ensaios: 37222 },
+          { ano: '2024', amostras: 18767, ensaios: 51399 },
+          { ano: '2025', amostras: 31626, ensaios: 71454 },
+        ];
 
-const dataFinanceiro = [
-  { ref: 'Jan/25', estoque: 243953.35, empenhado: 19605.77 },
-  { ref: 'Fev/25', estoque: 245296.26, empenhado: 19701.99 },
-  { ref: 'Mar/25', estoque: 274407.73, empenhado: 19727.99 },
-  { ref: 'Abr/25', estoque: 394022.90, empenhado: 19719.97 },
-  { ref: 'Mai/25', estoque: 349950.14, empenhado: 19719.96 },
-  { ref: 'Jun/25', estoque: 259432.95, empenhado: 0 },
-  { ref: 'Jul/25', estoque: 299340.18, empenhado: 0 },
-  { ref: 'Ago/25', estoque: 288758.16, empenhado: 0 },
-  { ref: 'Set/25', estoque: 288758.16, empenhado: 0 },
-  { ref: 'Out/25', estoque: 292109.46, empenhado: 0 },
-  { ref: 'Nov/25', estoque: 316716.29, empenhado: 0 },
-  { ref: 'Dez/25', estoque: 363658.03, empenhado: 0 },
-  { ref: 'Jan/26', estoque: 352879.60, empenhado: 0 },
-  { ref: 'Fev/26', estoque: 302638.12, empenhado: 0 },
-];
+        const dataAgua = [
+          { mes: 'Jan', agua: 685, totalFq: 2042, perc: 33.5 },
+          { mes: 'Fev', agua: 831, totalFq: 2415, perc: 34.4 },
+          { mes: 'Mar', agua: 784, totalFq: 2158, perc: 36.3 },
+          { mes: 'Abr', agua: 812, totalFq: 2205, perc: 36.8 },
+          { mes: 'Mai', agua: 868, totalFq: 2302, perc: 37.7 },
+          { mes: 'Jun', agua: 1053, totalFq: 2350, perc: 44.8 },
+          { mes: 'Jul', agua: 1527, totalFq: 2903, perc: 52.6 },
+          { mes: 'Ago', agua: 764, totalFq: 1764, perc: 43.3 },
+          { mes: 'Set', agua: 800, totalFq: 2000, perc: 40.0 },
+          { mes: 'Out', agua: 850, totalFq: 2073, perc: 41.0 },
+          { mes: 'Nov', agua: 900, totalFq: 2142, perc: 42.0 },
+          { mes: 'Dez', agua: 950, totalFq: 2209, perc: 43.0 },
+        ];
 
-// --- COMPONENTES AUXILIARES ---
+        const dataSubcontratacao = [
+          { mes: 'Jan', metais: 66, analisadasIts: 66, subcontratado: 0, custo: 0 },
+          { mes: 'Fev', metais: 124, analisadasIts: 100, subcontratado: 24, custo: 4800 },
+          { mes: 'Mar', metais: 73, analisadasIts: 70, subcontratado: 3, custo: 600 },
+          { mes: 'Abr', metais: 112, analisadasIts: 100, subcontratado: 12, custo: 2400 },
+          { mes: 'Mai', metais: 80, analisadasIts: 70, subcontratado: 10, custo: 2000 },
+          { mes: 'Jun', metais: 136, analisadasIts: 94, subcontratado: 42, custo: 8400 },
+          { mes: 'Jul', metais: 184, analisadasIts: 132, subcontratado: 52, custo: 10400 },
+          { mes: 'Ago', metais: 156, analisadasIts: 109, subcontratado: 47, custo: 9400 },
+          { mes: 'Set', metais: 144, analisadasIts: 122, subcontratado: 20, custo: 4000 },
+          { mes: 'Out', metais: 234, analisadasIts: 127, subcontratado: 107, custo: 21400 },
+          { mes: 'Nov', metais: 134, analisadasIts: 125, subcontratado: 9, custo: 1800 },
+          { mes: 'Dez', metais: 121, analisadasIts: 100, subcontratado: 21, custo: 4200 },
+        ];
 
-const Card = ({ title, value, icon: Icon, subtitle, colorClass }) => (
-  <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-    <div className="flex justify-between items-start">
-      <div>
-        <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{title}</p>
-        <h3 className="text-3xl font-extrabold text-gray-900 mt-2">{value}</h3>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
-      </div>
-      <div className={`p-3 rounded-xl ${colorClass}`}>
-        <Icon size={24} className="text-white" />
-      </div>
-    </div>
-  </div>
-);
+        const dataFinanceiro = [
+          { ref: 'Jan/25', estoque: 243953.35, empenhado: 19605.77 },
+          { ref: 'Fev/25', estoque: 245296.26, empenhado: 19701.99 },
+          { ref: 'Mar/25', estoque: 274407.73, empenhado: 19727.99 },
+          { ref: 'Abr/25', estoque: 394022.90, empenhado: 19719.97 },
+          { ref: 'Mai/25', estoque: 349950.14, empenhado: 19719.96 },
+          { ref: 'Jun/25', estoque: 259432.95, empenhado: 0 },
+          { ref: 'Jul/25', estoque: 299340.18, empenhado: 0 },
+          { ref: 'Ago/25', estoque: 288758.16, empenhado: 0 },
+          { ref: 'Set/25', estoque: 288758.16, empenhado: 0 },
+          { ref: 'Out/25', estoque: 292109.46, empenhado: 0 },
+          { ref: 'Nov/25', estoque: 316716.29, empenhado: 0 },
+          { ref: 'Dez/25', estoque: 363658.03, empenhado: 0 },
+          { ref: 'Jan/26', estoque: 352879.60, empenhado: 0 },
+          { ref: 'Fev/26', estoque: 302638.12, empenhado: 0 },
+        ];
 
-const FormatCurrency = (value) => 
-  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-
-const FormatNumber = (value) => 
-  new Intl.NumberFormat('pt-BR').format(value);
-
-// --- COMPONENTE PRINCIPAL ---
-
-export default function App() {
-  const [activeTab, setActiveTab] = useState('evolucao');
-
-  return (
-    <div className="min-h-screen bg-gray-50 text-gray-900 font-sans p-4 md:p-8">
-      {/* Cabeçalho */}
-      <header className="max-w-7xl mx-auto mb-10 text-center md:text-left bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
-        <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-4">
-          Dashboard Analítico & Inteligência de Dados
-        </h1>
-        <p className="text-lg text-gray-700 max-w-4xl mb-4 leading-relaxed">
-          <strong>Bem-vindo ao nosso painel interativo.</strong> Este ambiente foi desenhado para traduzir números complexos das nossas planilhas em informações visuais simples e diretas. O objetivo aqui é ajudar a diretoria e a equipe a tomarem decisões estratégicas — como a aprovação de novos equipamentos — baseadas em dados reais de produção e custos.
-        </p>
-        <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg inline-block text-left">
-          <p className="text-sm text-blue-900">
-            <strong>💡 Como usar:</strong> Navegue pelos três botões abaixo para explorar diferentes temas. Em cada aba, você encontrará gráficos e explicações didáticas sobre o que aqueles números significam para o nosso dia a dia operacional.
-          </p>
-        </div>
-      </header>
-
-      {/* Navegação / Filtros */}
-      <div className="max-w-7xl mx-auto mb-8 flex flex-wrap gap-2 md:gap-4 bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
-        <button 
-          onClick={() => setActiveTab('evolucao')}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'evolucao' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-        >
-          <TrendingUp size={20} />
-          <span>Volume Histórico</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('projeto')}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'projeto' ? 'bg-teal-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-        >
-          <Droplet size={20} />
-          <span>Projeto Água & Hidreto</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('financeiro')}
-          className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'financeiro' ? 'bg-indigo-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
-        >
-          <DollarSign size={20} />
-          <span>Gestão Financeira</span>
-        </button>
-      </div>
-
-      {/* CONTEÚDO DAS ABAS */}
-      <main className="max-w-7xl mx-auto space-y-8">
-
-        {/* ABA 1: Evolução Histórica */}
-        {activeTab === 'evolucao' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
-            {/* Nota Explicativa Inicial - Aba 1 */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Entendendo o nosso crescimento</h2>
-              <p className="text-gray-700 leading-relaxed">
-                Para avaliar o tamanho do nosso laboratório, olhamos para dois indicadores principais: as <strong>Amostras</strong> (os frascos/materiais físicos que recebemos dos clientes) e os <strong>Ensaios</strong> (os testes químicos e físicos que fazemos nessas amostras). É importante notar que <em>uma única amostra que entra pela porta geralmente exige diversos ensaios diferentes para emissão de um laudo completo.</em>
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card 
-                title="Demanda de Ensaios (2025)" 
-                value={FormatNumber(71454)} 
-                subtitle="Pressão operacional máxima no laboratório"
-                icon={Activity} 
-                colorClass="bg-blue-600"
-              />
-              <Card 
-                title="Entrada de Amostras (2025)" 
-                value={FormatNumber(31626)} 
-                subtitle="Aumento drástico na complexidade por cliente"
-                icon={FlaskConical} 
-                colorClass="bg-blue-500"
-              />
-              <Card 
-                title="Taxa de Crescimento (2018-2025)" 
-                value="812%" 
-                subtitle="Escala exponencial: exige resposta em infraestrutura"
-                icon={TrendingUp} 
-                colorClass="bg-blue-800"
-              />
-            </div>
-
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Evolução do Volume Laboratorial (2018 a 2025)</h2>
-                <p className="text-gray-600 mt-2">
-                  O gráfico abaixo ilustra visualmente a nossa jornada. As barras azuis representam a quantidade de testes realizados, enquanto a linha verde mostra os materiais recebidos.
-                </p>
-                <div className="mt-4 p-4 bg-gray-50 rounded-xl text-sm text-gray-700 border border-gray-200">
-                  <strong>🔍 Como ler este gráfico:</strong> Observe a inclinação da linha verde e o grande salto nas barras azuis, especialmente a partir de 2021. Isso comprova que não apenas conquistamos mais clientes, mas cada cliente passou a exigir um volume de testes muito maior por amostra. Isso gera a necessidade imediata de expandirmos nossa capacidade técnica e produtiva.
-                </div>
-              </div>
-              <div className="h-96 w-full">
-                <ResponsiveContainer>
-                  <ComposedChart data={dataEvolucao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
-                    <XAxis dataKey="ano" stroke="#6b7280" fontWeight="bold" />
-                    <YAxis yAxisId="left" stroke="#2563eb" tickFormatter={(value) => FormatNumber(value)} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#0d9488" tickFormatter={(value) => FormatNumber(value)} />
-                    <Tooltip 
-                      formatter={(value) => FormatNumber(value)}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend wrapperStyle={{ paddingTop: '20px' }} />
-                    <Bar yAxisId="left" dataKey="ensaios" name="Total de Ensaios" fill="#2563eb" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="ensaios" position="top" formatter={(value) => FormatNumber(value)} style={{ fill: '#1e3a8a', fontSize: '11px', fontWeight: 'bold' }} />
-                    </Bar>
-                    <Line yAxisId="right" type="monotone" dataKey="amostras" name="Total de Amostras" stroke="#0d9488" strokeWidth={4} dot={{ r: 4 }} />
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ABA 2: Projeto Água e Hidreto */}
-        {activeTab === 'projeto' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
-            {/* Seção Justificativa do Gerador */}
-            <div className="bg-teal-50 border border-teal-100 rounded-3xl p-6 md:p-8">
-              <div className="flex flex-col md:flex-row gap-8 items-center">
-                <div className="flex-1">
-                  <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-800 px-4 py-2 rounded-full font-bold mb-4">
-                    <CheckCircle2 size={20} /> Case de Negócio: Gerador de Hidreto
-                  </div>
-                  <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Por que precisamos de um Gerador de Hidreto?</h2>
-                  <p className="text-gray-700 text-lg leading-relaxed mb-4">
-                    Atualmente, nosso laboratório tem um limite técnico. Quando recebemos testes complexos de Metais e Minerais que nossa equipe não consegue processar por falta deste equipamento específico, somos obrigados a <strong>subcontratar</strong> (ou seja, pagar outro laboratório parceiro para fazer o serviço em nosso nome).
-                  </p>
-                  <div className="bg-white bg-opacity-70 p-5 rounded-xl border border-teal-200 shadow-sm">
-                    <p className="text-gray-800 leading-relaxed">
-                      <strong>A Matemática da Internalização:</strong> Cada ensaio que mandamos para fora nos custa, em média, <strong>R$ 200,00</strong>. Ao adquirirmos o Gerador de Hidreto, passaremos a fazer esses testes "em casa". O que hoje é uma <em>despesa mensal de terceirização</em> se transformará em <em>lucro e agilidade</em> na entrega dos resultados.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 gap-4 w-full md:w-1/3">
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-bold text-gray-500 uppercase">Capital Evadido (2025)</p>
-                    <h3 className="text-3xl font-black text-red-600 mt-1">{FormatCurrency(69400)}</h3>
-                    <p className="text-xs text-gray-500 mt-2">*Valor que deixará de sair do caixa: conversão em margem de lucro</p>
-                  </div>
-                  <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
-                    <p className="text-sm font-bold text-gray-500 uppercase">Passivo Operacional</p>
-                    <h3 className="text-3xl font-black text-orange-500 mt-1">347 ensaios</h3>
-                    <p className="text-xs text-gray-500 mt-2">Volume represado por limitação tecnológica atual</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Gráfico de Subcontratação */}
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Análise de Gargalo: O que fazemos vs O que pagamos para fora</h2>
-              <p className="text-gray-600 mb-6">
-                Este gráfico "empilhado" mostra a nossa realidade mensal na área de Metais. A barra verde escuro representa o que conseguimos dar conta internamente. A barra laranja (no topo) é a representação visual do nosso gargalo: testes que fomos forçados a terceirizar e que motivam este projeto.
-              </p>
-              <div className="h-80 w-full">
-                <ResponsiveContainer>
-                  <BarChart data={dataSubcontratacao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="mes" stroke="#6b7280" />
-                    <YAxis stroke="#6b7280" />
-                    <Tooltip contentStyle={{ borderRadius: '12px' }} />
-                    <Legend />
-                    <Bar dataKey="analisadasIts" stackId="a" name="Analisadas Internamente (ITS)" fill="#0d9488" radius={[0, 0, 4, 4]} />
-                    <Bar dataKey="subcontratado" stackId="a" name="Subcontratado (Gargalo)" fill="#f97316" radius={[4, 4, 0, 0]}>
-                      <LabelList dataKey="subcontratado" position="top" style={{ fill: '#c2410c', fontSize: '12px', fontWeight: 'bold' }} formatter={(val) => val > 0 ? val : ''} />
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            <hr className="border-gray-200 my-8" />
-
-            {/* Representatividade da Água */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        // --- COMPONENTES AUXILIARES ---
+        const Card = ({ title, value, icon: Icon, subtitle, colorClass }) => (
+          <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex justify-between items-start">
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">A Importância Estratégica das Análises de Água</h2>
-                <p className="text-gray-600 mb-4 leading-relaxed">
-                  Para que um laboratório seja rentável, ele precisa focar nos seus "produtos-chefe". No nosso setor de Físico-Química (FQ), o ensaio de água tem se tornado o principal serviço demandado pelos clientes.
+                <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">{title}</p>
+                <h3 className="text-3xl font-extrabold text-gray-900 mt-2">{value}</h3>
+                {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+              </div>
+              <div className={`p-3 rounded-xl ${colorClass}`}>
+                <Icon size={24} className="text-white" />
+              </div>
+            </div>
+          </div>
+        );
+
+        const FormatCurrency = (value) => 
+          new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+
+        const FormatNumber = (value) => 
+          new Intl.NumberFormat('pt-BR').format(value);
+
+        // --- COMPONENTE PRINCIPAL (DASHBOARD) ---
+        function App() {
+          const [activeTab, setActiveTab] = useState('evolucao');
+
+          return (
+            <div className="min-h-screen p-4 md:p-8">
+              {/* Cabeçalho */}
+              <header className="max-w-7xl mx-auto mb-10 text-center md:text-left bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
+                <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 mb-4">
+                  Dashboard Analítico & Inteligência de Dados
+                </h1>
+                <p className="text-lg text-gray-700 max-w-4xl mb-4 leading-relaxed">
+                  <strong>Bem-vindo ao nosso painel interativo.</strong> Este ambiente foi desenhado para traduzir números complexos das nossas planilhas em informações visuais simples e diretas. O objetivo aqui é ajudar a diretoria e a equipe a tomarem decisões estratégicas — como a aprovação de novos equipamentos — baseadas em dados reais de produção e custos.
                 </p>
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  A linha azul no gráfico ao lado mostra como a porcentagem de testes em água cresceu de forma constante: de 33% (em Janeiro) para mais de 50% (em Julho). Isso significa que <strong>mais da metade de todo o nosso esforço neste setor passou a ser dedicado exclusivamente à água</strong>.
-                </p>
-                <div className="flex items-start gap-4 bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-sm">
-                  <AlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={28} />
-                  <p className="text-sm text-blue-900 font-medium leading-relaxed">
-                    <strong>Comprovação de Pico:</strong> Em Julho de 2025, fizemos impressionantes 1.527 ensaios somente de água. Esse recorde representou 52,6% de todo o setor Físico-Químico em apenas um único mês, validando a urgência de fortalecer este departamento.
+                <div className="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg inline-block text-left">
+                  <p className="text-sm text-blue-900">
+                    <strong>💡 Como usar:</strong> Navegue pelos três botões abaixo para explorar diferentes temas. Em cada aba, você encontrará gráficos e explicações didáticas sobre o que aqueles números significam para o nosso dia a dia operacional.
                   </p>
                 </div>
-              </div>
-              
-              <div className="h-80 w-full bg-white p-4 rounded-3xl border border-gray-200 shadow-sm">
-                <ResponsiveContainer>
-                  <ComposedChart data={dataAgua}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
-                    <YAxis yAxisId="left" />
-                    <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${v}%`} />
-                    <Tooltip />
-                    <Legend />
-                    <Bar yAxisId="left" dataKey="totalFq" name="Total Físico-Químico" fill="#93c5fd" radius={[4, 4, 0, 0]} />
-                    <Line yAxisId="right" type="monotone" dataKey="perc" name="% de Água" stroke="#1d4ed8" strokeWidth={3} dot={{ r: 5, fill: '#1d4ed8' }}>
-                      <LabelList dataKey="perc" position="top" formatter={(v) => `${v}%`} style={{ fill: '#1e3a8a', fontSize: '11px', fontWeight: 'bold' }} />
-                    </Line>
-                  </ComposedChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
+              </header>
 
-        {/* ABA 3: Gestão Financeira */}
-        {activeTab === 'financeiro' && (
-          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            
-            {/* Nota Explicativa Financeira */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">Dicionário Básico: Estoque x Empenho</h2>
-              <div className="grid md:grid-cols-2 gap-6 mt-4">
-                <div className="flex gap-4">
-                  <div className="w-1.5 bg-indigo-600 rounded-full"></div>
-                  <div>
-                    <h3 className="font-bold text-gray-800 text-lg">O que é "Valor em Estoque"?</h3>
-                    <p className="text-sm text-gray-600 mt-2 leading-relaxed">É o dinheiro da empresa que está "parado" nas prateleiras em formato de reagentes, frascos e insumos laboratoriais. Precisamos desse estoque para o laboratório não parar, mas gerenciá-lo bem evita que o capital de giro fique imobilizado desnecessariamente.</p>
+              {/* Navegação / Filtros */}
+              <div className="max-w-7xl mx-auto mb-8 flex flex-wrap gap-2 md:gap-4 bg-white p-2 rounded-2xl shadow-sm border border-gray-200">
+                <button 
+                  onClick={() => setActiveTab('evolucao')}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'evolucao' ? 'bg-blue-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
+                >
+                  <IconTrendingUp size={20} />
+                  <span>Volume Histórico</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('projeto')}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'projeto' ? 'bg-teal-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
+                >
+                  <IconDroplet size={20} />
+                  <span>Projeto Água & Hidreto</span>
+                </button>
+                <button 
+                  onClick={() => setActiveTab('financeiro')}
+                  className={`flex-1 py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors ${activeTab === 'financeiro' ? 'bg-indigo-600 text-white' : 'bg-transparent text-gray-600 hover:bg-gray-100'}`}
+                >
+                  <IconDollarSign size={20} />
+                  <span>Gestão Financeira</span>
+                </button>
+              </div>
+
+              {/* CONTEÚDO DAS ABAS */}
+              <main className="max-w-7xl mx-auto space-y-8">
+
+                {/* ABA 1: Evolução Histórica */}
+                {activeTab === 'evolucao' && (
+                  <div className="space-y-8 animate-in">
+                    
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                      <h2 className="text-xl font-bold text-gray-900 mb-2">Entendendo o nosso crescimento</h2>
+                      <p className="text-gray-700 leading-relaxed">
+                        Para avaliar o tamanho do nosso laboratório, olhamos para dois indicadores principais: as <strong>Amostras</strong> (os frascos/materiais físicos que recebemos dos clientes) e os <strong>Ensaios</strong> (os testes químicos e físicos que fazemos nessas amostras). É importante notar que <em>uma única amostra que entra pela porta geralmente exige diversos ensaios diferentes para emissão de um laudo completo.</em>
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <Card title="Demanda de Ensaios (2025)" value={FormatNumber(71454)} subtitle="Pressão operacional máxima no laboratório" icon={IconActivity} colorClass="bg-blue-600" />
+                      <Card title="Entrada de Amostras (2025)" value={FormatNumber(31626)} subtitle="Aumento drástico na complexidade por cliente" icon={IconFlaskConical} colorClass="bg-blue-500" />
+                      <Card title="Taxa de Crescimento (2018-2025)" value="812%" subtitle="Escala exponencial: exige resposta em infraestrutura" icon={IconTrendingUp} colorClass="bg-blue-800" />
+                    </div>
+
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
+                      <div className="mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">Evolução do Volume Laboratorial (2018 a 2025)</h2>
+                        <p className="text-gray-600 mt-2">
+                          O gráfico abaixo ilustra visualmente a nossa jornada. As barras azuis representam a quantidade de testes realizados, enquanto a linha verde mostra os materiais recebidos.
+                        </p>
+                        <div className="mt-4 p-4 bg-gray-50 rounded-xl text-sm text-gray-700 border border-gray-200">
+                          <strong>🔍 Como ler este gráfico:</strong> Observe a inclinação da linha verde e o grande salto nas barras azuis, especialmente a partir de 2021. Isso comprova que não apenas conquistamos mais clientes, mas cada cliente passou a exigir um volume de testes muito maior por amostra. Isso gera a necessidade imediata de expandirmos nossa capacidade técnica e produtiva.
+                        </div>
+                      </div>
+                      <div className="h-96 w-full">
+                        <ResponsiveContainer>
+                          <ComposedChart data={dataEvolucao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
+                            <XAxis dataKey="ano" stroke="#6b7280" fontWeight="bold" />
+                            <YAxis yAxisId="left" stroke="#2563eb" tickFormatter={(value) => FormatNumber(value)} />
+                            <YAxis yAxisId="right" orientation="right" stroke="#0d9488" tickFormatter={(value) => FormatNumber(value)} />
+                            <Tooltip formatter={(value) => FormatNumber(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                            <Legend wrapperStyle={{ paddingTop: '20px' }} />
+                            <Bar yAxisId="left" dataKey="ensaios" name="Total de Ensaios" fill="#2563eb" radius={[4, 4, 0, 0]}>
+                              <LabelList dataKey="ensaios" position="top" formatter={(value) => FormatNumber(value)} style={{ fill: '#1e3a8a', fontSize: '11px', fontWeight: 'bold' }} />
+                            </Bar>
+                            <Line yAxisId="right" type="monotone" dataKey="amostras" name="Total de Amostras" stroke="#0d9488" strokeWidth={4} dot={{ r: 4 }} />
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex gap-4">
-                  <div className="w-1.5 bg-pink-500 rounded-full"></div>
-                  <div>
-                    <h3 className="font-bold text-gray-800 text-lg">O que é "Valor Empenhado"?</h3>
-                    <p className="text-sm text-gray-600 mt-2 leading-relaxed">É o orçamento que já está formalmente comprometido e reservado para compras futuras, pagamentos de projetos ou fornecedores em andamento.</p>
+                )}
+
+                {/* ABA 2: Projeto Água e Hidreto */}
+                {activeTab === 'projeto' && (
+                  <div className="space-y-8 animate-in">
+                    
+                    <div className="bg-teal-50 border border-teal-100 rounded-3xl p-6 md:p-8">
+                      <div className="flex flex-col md:flex-row gap-8 items-center">
+                        <div className="flex-1">
+                          <div className="inline-flex items-center gap-2 bg-teal-100 text-teal-800 px-4 py-2 rounded-full font-bold mb-4">
+                            <IconCheckCircle2 size={20} /> Case de Negócio: Gerador de Hidreto
+                          </div>
+                          <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Por que precisamos de um Gerador de Hidreto?</h2>
+                          <p className="text-gray-700 text-lg leading-relaxed mb-4">
+                            Atualmente, nosso laboratório tem um limite técnico. Quando recebemos testes complexos de Metais e Minerais que nossa equipe não consegue processar por falta deste equipamento específico, somos obrigados a <strong>subcontratar</strong> (ou seja, pagar outro laboratório parceiro para fazer o serviço em nosso nome).
+                          </p>
+                          <div className="bg-white bg-opacity-70 p-5 rounded-xl border border-teal-200 shadow-sm">
+                            <p className="text-gray-800 leading-relaxed">
+                              <strong>A Matemática da Internalização:</strong> Cada ensaio que mandamos para fora nos custa, em média, <strong>R$ 200,00</strong>. Ao adquirirmos o Gerador de Hidreto, passaremos a fazer esses testes "em casa". O que hoje é uma <em>despesa mensal de terceirização</em> se transformará em <em>lucro e agilidade</em> na entrega dos resultados.
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="grid grid-cols-1 gap-4 w-full md:w-1/3">
+                          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm font-bold text-gray-500 uppercase">Capital Evadido (2025)</p>
+                            <h3 className="text-3xl font-black text-red-600 mt-1">{FormatCurrency(69400)}</h3>
+                            <p className="text-xs text-gray-500 mt-2">*Valor que deixará de sair do caixa: conversão em margem de lucro</p>
+                          </div>
+                          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+                            <p className="text-sm font-bold text-gray-500 uppercase">Passivo Operacional</p>
+                            <h3 className="text-3xl font-black text-orange-500 mt-1">347 ensaios</h3>
+                            <p className="text-xs text-gray-500 mt-2">Volume represado por limitação tecnológica atual</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
+                      <h2 className="text-xl font-bold text-gray-900 mb-2">Análise de Gargalo: O que fazemos vs O que pagamos para fora</h2>
+                      <p className="text-gray-600 mb-6">
+                        Este gráfico "empilhado" mostra a nossa realidade mensal na área de Metais. A barra verde escuro representa o que conseguimos dar conta internamente. A barra laranja (no topo) é a representação visual do nosso gargalo: testes que fomos forçados a terceirizar e que motivam este projeto.
+                      </p>
+                      <div className="h-80 w-full">
+                        <ResponsiveContainer>
+                          <BarChart data={dataSubcontratacao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                            <XAxis dataKey="mes" stroke="#6b7280" />
+                            <YAxis stroke="#6b7280" />
+                            <Tooltip contentStyle={{ borderRadius: '12px' }} />
+                            <Legend />
+                            <Bar dataKey="analisadasIts" stackId="a" name="Analisadas Internamente (ITS)" fill="#0d9488" radius={[0, 0, 4, 4]} />
+                            <Bar dataKey="subcontratado" stackId="a" name="Subcontratado (Gargalo)" fill="#f97316" radius={[4, 4, 0, 0]}>
+                              <LabelList dataKey="subcontratado" position="top" style={{ fill: '#c2410c', fontSize: '12px', fontWeight: 'bold' }} formatter={(val) => val > 0 ? val : ''} />
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+
+                    <hr className="border-gray-200 my-8" />
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                      <div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">A Importância Estratégica das Análises de Água</h2>
+                        <p className="text-gray-600 mb-4 leading-relaxed">
+                          Para que um laboratório seja rentável, ele precisa focar nos seus "produtos-chefe". No nosso setor de Físico-Química (FQ), o ensaio de água tem se tornado o principal serviço demandado pelos clientes.
+                        </p>
+                        <p className="text-gray-600 mb-6 leading-relaxed">
+                          A linha azul no gráfico ao lado mostra como a porcentagem de testes em água cresceu de forma constante: de 33% (em Janeiro) para mais de 50% (em Julho). Isso significa que <strong>mais da metade de todo o nosso esforço neste setor passou a ser dedicado exclusivamente à água</strong>.
+                        </p>
+                        <div className="flex items-start gap-4 bg-blue-50 p-5 rounded-xl border border-blue-100 shadow-sm">
+                          <IconAlertCircle className="text-blue-600 flex-shrink-0 mt-1" size={28} />
+                          <p className="text-sm text-blue-900 font-medium leading-relaxed">
+                            <strong>Comprovação de Pico:</strong> Em Julho de 2025, fizemos impressionantes 1.527 ensaios somente de água. Esse recorde representou 52,6% de todo o setor Físico-Químico em apenas um único mês, validando a urgência de fortalecer este departamento.
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="h-80 w-full bg-white p-4 rounded-3xl border border-gray-200 shadow-sm">
+                        <ResponsiveContainer>
+                          <ComposedChart data={dataAgua}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                            <XAxis dataKey="mes" tick={{ fontSize: 12 }} />
+                            <YAxis yAxisId="left" />
+                            <YAxis yAxisId="right" orientation="right" tickFormatter={(v) => `${v}%`} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar yAxisId="left" dataKey="totalFq" name="Total Físico-Químico" fill="#93c5fd" radius={[4, 4, 0, 0]} />
+                            <Line yAxisId="right" type="monotone" dataKey="perc" name="% de Água" stroke="#1d4ed8" strokeWidth={3} dot={{ r: 5, fill: '#1d4ed8' }}>
+                              <LabelList dataKey="perc" position="top" formatter={(v) => `${v}%`} style={{ fill: '#1e3a8a', fontSize: '11px', fontWeight: 'bold' }} />
+                            </Line>
+                          </ComposedChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </div>
+                )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card 
-                title="Capital Imobilizado (Pico Abr/25)" 
-                value={FormatCurrency(394022.90)} 
-                subtitle="Alerta estratégico: Necessidade de otimização de estoque"
-                icon={DollarSign} 
-                colorClass="bg-indigo-600"
-              />
-              <Card 
-                title="Espaço Fiscal (Empenho Futuro)" 
-                value="Zerado" 
-                subtitle="Orçamento livre a partir de Jun/25 para novos investimentos (Capex)"
-                icon={Activity} 
-                colorClass="bg-indigo-400"
-              />
-            </div>
+                {/* ABA 3: Gestão Financeira */}
+                {activeTab === 'financeiro' && (
+                  <div className="space-y-8 animate-in">
+                    
+                    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
+                      <h2 className="text-xl font-bold text-gray-900 mb-2">Dicionário Básico: Estoque x Empenho</h2>
+                      <div className="grid md:grid-cols-2 gap-6 mt-4">
+                        <div className="flex gap-4">
+                          <div className="w-1.5 bg-indigo-600 rounded-full"></div>
+                          <div>
+                            <h3 className="font-bold text-gray-800 text-lg">O que é "Valor em Estoque"?</h3>
+                            <p className="text-sm text-gray-600 mt-2 leading-relaxed">É o dinheiro da empresa que está "parado" nas prateleiras em formato de reagentes, frascos e insumos laboratoriais. Precisamos desse estoque para o laboratório não parar, mas gerenciá-lo bem evita que o capital de giro fique imobilizado desnecessariamente.</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-4">
+                          <div className="w-1.5 bg-pink-500 rounded-full"></div>
+                          <div>
+                            <h3 className="font-bold text-gray-800 text-lg">O que é "Valor Empenhado"?</h3>
+                            <p className="text-sm text-gray-600 mt-2 leading-relaxed">É o orçamento que já está formalmente comprometido e reservado para compras futuras, pagamentos de projetos ou fornecedores em andamento.</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-            <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Histórico de Movimentação Financeira</h2>
-                <p className="text-gray-600 mt-2 mb-4">
-                  Esta visualização, chamada de gráfico de áreas, ajuda a acompanhar como o capital de giro se move ao longo dos meses.
-                </p>
-                <div className="p-4 bg-indigo-50 rounded-xl text-sm text-indigo-900 border border-indigo-100 shadow-inner">
-                  <strong>💡 Análise Didática:</strong> Note que a "montanha" azul clara (estoque) tem o seu ápice em Abril/25 (chegando a quase R$ 400 mil), o que sugere uma grande rodada de aquisição de insumos. Já a área rosa (dinheiro empenhado/comprometido) vinha contínua e, subitamente, foi zerada a partir de Junho. Isso indica que os projetos/compras anteriores foram quitados, liberando espaço orçamentário para novos investimentos — como a aquisição do equipamento sugerido na aba anterior.
-                </div>
-              </div>
-              <div className="h-96 w-full">
-                <ResponsiveContainer>
-                  <AreaChart data={dataFinanceiro} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                    <XAxis dataKey="ref" stroke="#6b7280" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#6b7280" tickFormatter={(value) => `R$ ${value / 1000}k`} />
-                    <Tooltip 
-                      formatter={(value) => FormatCurrency(value)}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                    />
-                    <Legend />
-                    <Area type="monotone" dataKey="estoque" name="Valor em Estoque" stroke="#4f46e5" fill="#c7d2fe" strokeWidth={3} />
-                    <Area type="monotone" dataKey="empenhado" name="Valor Empenhado" stroke="#ec4899" fill="#fbcfe8" strokeWidth={3} />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <Card title="Capital Imobilizado (Pico Abr/25)" value={FormatCurrency(394022.90)} subtitle="Alerta estratégico: Necessidade de otimização de estoque" icon={IconDollarSign} colorClass="bg-indigo-600" />
+                      <Card title="Espaço Fiscal (Empenho Futuro)" value="Zerado" subtitle="Orçamento livre a partir de Jun/25 para novos investimentos (Capex)" icon={IconActivity} colorClass="bg-indigo-400" />
+                    </div>
 
-      </main>
-    </div>
-  );
-}
+                    <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
+                      <div className="mb-6">
+                        <h2 className="text-2xl font-bold text-gray-900">Histórico de Movimentação Financeira</h2>
+                        <p className="text-gray-600 mt-2 mb-4">
+                          Esta visualização, chamada de gráfico de áreas, ajuda a acompanhar como o capital de giro se move ao longo dos meses.
+                        </p>
+                        <div className="p-4 bg-indigo-50 rounded-xl text-sm text-indigo-900 border border-indigo-100 shadow-inner">
+                          <strong>💡 Análise Didática:</strong> Note que a "montanha" azul clara (estoque) tem o seu ápice em Abril/25 (chegando a quase R$ 400 mil), o que sugere uma grande rodada de aquisição de insumos. Já a área rosa (dinheiro empenhado/comprometido) vinha contínua e, subitamente, foi zerada a partir de Junho. Isso indica que os projetos/compras anteriores foram quitados, liberando espaço orçamentário para novos investimentos — como a aquisição do equipamento sugerido na aba anterior.
+                        </div>
+                      </div>
+                      <div className="h-96 w-full">
+                        <ResponsiveContainer>
+                          <AreaChart data={dataFinanceiro} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
+                            <XAxis dataKey="ref" stroke="#6b7280" tick={{ fontSize: 12 }} />
+                            <YAxis stroke="#6b7280" tickFormatter={(value) => `R$ ${value / 1000}k`} />
+                            <Tooltip formatter={(value) => FormatCurrency(value)} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }} />
+                            <Legend />
+                            <Area type="monotone" dataKey="estoque" name="Valor em Estoque" stroke="#4f46e5" fill="#c7d2fe" strokeWidth={3} />
+                            <Area type="monotone" dataKey="empenhado" name="Valor Empenhado" stroke="#ec4899" fill="#fbcfe8" strokeWidth={3} />
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+              </main>
+            </div>
+          );
+        }
+
+        // Renderizando o App
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
