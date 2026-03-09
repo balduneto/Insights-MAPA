@@ -7,22 +7,28 @@
     
     <!-- Importando Tailwind CSS para o Design e Layout -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Força o Tailwind a aplicar o "reset" de estilos, evitando conflitos com o GitHub Pages
+        tailwind.config = {
+            corePlugins: { preflight: true }
+        }
+    </script>
     
-    <!-- Importando React e ReactDOM via CDN (Versões Fixas para garantir estabilidade no UMD) -->
-    <script crossorigin src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+    <!-- Importando React e ReactDOM via jsDelivr (Mais estável para GitHub Pages) -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
     
-    <!-- Dependência obrigatória para as versões em navegador do Recharts -->
-    <script crossorigin src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+    <!-- Dependência obrigatória (prop-types) -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js"></script>
     
-    <!-- Importando Recharts (Biblioteca de Gráficos) via CDN (Versão Fixada na 2.1.9 para evitar o erro de 'ForwardRef') -->
-    <script crossorigin src="https://unpkg.com/recharts@2.1.9/umd/Recharts.js"></script>
+    <!-- Importando Recharts via jsDelivr -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/recharts@2.1.9/umd/Recharts.js"></script>
     
-    <!-- Importando Babel para compilar o JSX direto no navegador -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Importando Babel -->
+    <script crossorigin src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.22.13/babel.min.js"></script>
 
     <style>
-        /* Ajuste fino para animações de fade-in contidas no Tailwind original */
+        /* Ajuste fino para animações e correção de redimensionamento dos gráficos */
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -30,44 +36,56 @@
         .animate-in {
             animation: fadeIn 0.5s ease-out forwards;
         }
+        /* Força os gráficos a respeitarem o limite do container e não explodirem o layout */
+        .recharts-responsive-container {
+            min-height: 100px;
+            width: 100% !important;
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-900 font-sans">
+<body class="bg-gray-50 text-gray-900 font-sans antialiased">
     
     <!-- Onde o React vai injetar o Dashboard -->
-    <div id="root"></div>
+    <div id="root">
+        <!-- Tela de Carregamento Temporária (Evita tela branca) -->
+        <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50">
+            <div class="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+            <h2 class="text-xl font-bold text-gray-700">Construindo Dashboard...</h2>
+            <p class="text-gray-500 text-sm mt-2">Carregando inteligência de dados</p>
+        </div>
+    </div>
 
     <!-- Script do Aplicativo -->
     <script type="text/babel">
-        // Extraindo ferramentas do React e Recharts
         const { useState } = React;
         const { 
           BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
           ResponsiveContainer, AreaChart, Area, ComposedChart, LabelList 
         } = window.Recharts;
 
-        // --- ÍCONES (Convertidos de lucide-react para SVG inline nativo para funcionar sem Node.js) ---
+        // --- ÍCONES (Com xmlns para evitar corrupção de SVG no GH Pages) ---
         const IconTrendingUp = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         );
         const IconDroplet = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></svg>
         );
         const IconDollarSign = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         );
         const IconActivity = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         );
         const IconFlaskConical = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 2v7.31"/><path d="M14 9.3V1.99"/><path d="M8.5 2h7"/><path d="M14 9.3a6.5 6.5 0 1 1-4 0"/><path d="M5.52 16h12.96"/></svg>
         );
         const IconAlertCircle = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
         );
         const IconCheckCircle2 = ({ size = 24, className = "" }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
         );
+
 
         // --- DADOS EXTRAÍDOS DAS PLANILHAS ---
         const dataEvolucao = [
@@ -226,7 +244,9 @@
                           <strong>🔍 Como ler este gráfico:</strong> Observe a inclinação da linha verde e o grande salto nas barras azuis, especialmente a partir de 2021. Isso comprova que não apenas conquistamos mais clientes, mas cada cliente passou a exigir um volume de testes muito maior por amostra. Isso gera a necessidade imediata de expandirmos nossa capacidade técnica e produtiva.
                         </div>
                       </div>
-                      <div className="h-96 w-full">
+                      
+                      {/* Envolto min-w-0 adicionado para evitar o infinite resize bug do Recharts */}
+                      <div className="h-96 w-full min-w-0" style={{ position: 'relative' }}>
                         <ResponsiveContainer>
                           <ComposedChart data={dataEvolucao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" vertical={false} />
@@ -287,7 +307,9 @@
                       <p className="text-gray-600 mb-6">
                         Este gráfico "empilhado" mostra a nossa realidade mensal na área de Metais. A barra verde escuro representa o que conseguimos dar conta internamente. A barra laranja (no topo) é a representação visual do nosso gargalo: testes que fomos forçados a terceirizar e que motivam este projeto.
                       </p>
-                      <div className="h-80 w-full">
+                      
+                      {/* Envolto min-w-0 adicionado */}
+                      <div className="h-80 w-full min-w-0" style={{ position: 'relative' }}>
                         <ResponsiveContainer>
                           <BarChart data={dataSubcontratacao} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
@@ -323,7 +345,8 @@
                         </div>
                       </div>
                       
-                      <div className="h-80 w-full bg-white p-4 rounded-3xl border border-gray-200 shadow-sm">
+                      {/* Envolto min-w-0 adicionado */}
+                      <div className="h-80 w-full bg-white p-4 rounded-3xl border border-gray-200 shadow-sm min-w-0" style={{ position: 'relative' }}>
                         <ResponsiveContainer>
                           <ComposedChart data={dataAgua}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
@@ -382,7 +405,9 @@
                           <strong>💡 Análise Didática:</strong> Note que a "montanha" azul clara (estoque) tem o seu ápice em Abril/25 (chegando a quase R$ 400 mil), o que sugere uma grande rodada de aquisição de insumos. Já a área rosa (dinheiro empenhado/comprometido) vinha contínua e, subitamente, foi zerada a partir de Junho. Isso indica que os projetos/compras anteriores foram quitados, liberando espaço orçamentário para novos investimentos — como a aquisição do equipamento sugerido na aba anterior.
                         </div>
                       </div>
-                      <div className="h-96 w-full">
+                      
+                      {/* Envolto min-w-0 adicionado */}
+                      <div className="h-96 w-full min-w-0" style={{ position: 'relative' }}>
                         <ResponsiveContainer>
                           <AreaChart data={dataFinanceiro} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
