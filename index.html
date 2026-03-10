@@ -89,11 +89,14 @@
 
         // --- DADOS EXTRAÍDOS DAS PLANILHAS ---
         const dataEvolucao = [
+          { ano: '2018', amostras: 1562, ensaios: 7835 },
+          { ano: '2019', amostras: 2441, ensaios: 17170 },
+          { ano: '2020', amostras: 3147, ensaios: 12520 },
           { ano: '2021', amostras: 9417, ensaios: 26019 },
           { ano: '2022', amostras: 13165, ensaios: 29588 },
           { ano: '2023', amostras: 12398, ensaios: 37222 },
           { ano: '2024', amostras: 18767, ensaios: 51399 },
-          { ano: '2025', amostras: 31626, ensaios: 71454 },
+          { ano: '2025', amostras: 29609, ensaios: 77486 },
         ];
 
         // ATUALIZADO: Dados reais de Setembro a Dezembro inseridos
@@ -227,19 +230,19 @@
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <Card title="Demanda de Ensaios (2025)" value={FormatNumber(71454)} subtitle="Pressão operacional máxima no laboratório" icon={IconActivity} colorClass="bg-blue-600" />
-                      <Card title="Entrada de Amostras (2025)" value={FormatNumber(31626)} subtitle="Aumento drástico na complexidade por cliente" icon={IconFlaskConical} colorClass="bg-blue-500" />
-                      <Card title="Taxa de Crescimento (2021-2025)" value="175%" subtitle="Escala exponencial: exige resposta em infraestrutura" icon={IconTrendingUp} colorClass="bg-blue-800" />
+                      <Card title="Demanda de Ensaios (2025)" value={FormatNumber(77486)} subtitle="Pressão operacional máxima no laboratório" icon={IconActivity} colorClass="bg-blue-600" />
+                      <Card title="Entrada de Amostras (2025)" value={FormatNumber(29609)} subtitle="Volume recorde absoluto de recebimento de materiais" icon={IconFlaskConical} colorClass="bg-blue-500" />
+                      <Card title="Crescimento (2018-2025)" value="980%" subtitle="Salto em ensaios (vs. 73,5% em amostras)" icon={IconTrendingUp} colorClass="bg-blue-800" />
                     </div>
 
                     <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-200 shadow-sm">
                       <div className="mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">Evolução do Volume Laboratorial (2021 a 2025)</h2>
+                        <h2 className="text-2xl font-bold text-gray-900">Evolução do Volume Laboratorial (2018 a 2025)</h2>
                         <p className="text-gray-600 mt-2">
-                          O gráfico abaixo ilustra visualmente a nossa jornada. As barras azuis representam a quantidade de testes realizados, enquanto a linha verde mostra os materiais recebidos.
+                          O gráfico abaixo ilustra visualmente a nossa jornada histórica completa. As barras azuis representam a quantidade de testes realizados, enquanto a linha verde mostra os materiais recebidos.
                         </p>
                         <div className="mt-4 p-4 bg-gray-50 rounded-xl text-sm text-gray-700 border border-gray-200">
-                          <strong>🔍 Como ler este gráfico:</strong> Observe a inclinação da linha verde e o grande salto nas barras azuis, especialmente a partir de 2021. Isso comprova que não apenas conquistamos mais clientes, mas cada cliente passou a exigir um volume de testes muito maior por amostra. Isso gera a necessidade imediata de expandirmos nossa capacidade técnica e produtiva.
+                          <strong>🔍 A Origem do Gargalo:</strong> A análise revela a verdadeira causa da nossa pressão operacional. No comparativo de 2025 contra 2018, enquanto a entrada de amostras cresceu <strong>73,5%</strong>, o volume de ensaios explodiu em aproximadamente <strong>980%</strong>. Isso comprova de forma inquestionável que <em>cada amostra recebida passou a exigir uma esteira de testes muito mais longa e complexa</em>. Esse descolamento gritante entre as duas métricas é o que sobrecarrega a equipe atual e justifica de forma irrefutável a urgência no investimento em automação e em novos equipamentos.
                         </div>
                       </div>
                       
